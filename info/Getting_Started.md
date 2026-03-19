@@ -28,13 +28,21 @@ API_KEY='YOUR_KEY_HERE'
 
 ## Notebooks
 
-### 1. Requesting data
+### 1. Requesting Data
 
-Run ```/notebooks/RequestData.ipynb``` to download the dataset as .csv into ```/data/raw/```.
+```/notebooks/RequestData.ipynb``` download the dataset as .csv into ```/data/raw/```.
 
-### 2. Analysing data
+### 2. Analysing Data
 
-Run ```/notebooks/AnalyseData.ipynb``` to analyse and visualise the dataset. Identify data preparation steps, potential biases and risks.
+```/notebooks/AnalyseData.ipynb``` analyse and visualise the dataset. Identify data preparation steps, potential biases and risks.
+
+### 3. Prepare Data
+
+```/notebooks/PrepareData.ipynb``` clean, transform and prepare data for training models.
+
+### 4. Decision Tree
+
+```/notebooks/DecisionTree.ipynb``` first and most basic approach. No need to standardize or normalize data.
 
 ## Dataset Options
 
