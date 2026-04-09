@@ -20,15 +20,31 @@ dataUnSup = {
 	]
 }
 
-data = dataUnSup
+print("Getting available models...")
 
-print(f"sending...\n {data['model']} | {len(data['input'])} rows")
+data = dataSup
+
+response = requests.get("http://localhost:5000/tasks")
+response = response.json()
+
+i = 0
+for task in response:
+	i+=1
+	print(f"  {i} - {task}")
+
+type = input(f"\nSelect model (1-{i}): ")
+
+if type == "5":
+	data = dataUnSup
+
+data["model"] = response[int(type)-1]
+
+print(f"sending... {data['model']} | {len(data['input'])} rows")
 
 response = requests.post(url, json=data).json()
 
-print(f"response:\n {response}")
-
-print(f"elapsed: {response['time_taken_seconds']:.5f} seconds\n")
+print(f"response: {response}")
+print(f"elapsed:  {response['time_taken_seconds']:.5f} seconds\n")
 
 print(f"{'probability':<25} | prediction")
 print("-" * 40)
@@ -36,4 +52,4 @@ print("-" * 40)
 for prob, pred in response["output"]:
 	print(f"{prob:<25.22f} | {pred}")
 
-# python test.py
+# python test2.py

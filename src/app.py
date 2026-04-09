@@ -8,6 +8,8 @@ from sklearn.tree import DecisionTreeClassifier
 
 from classifier_neural_net.model import Model
 from graph_neural_net.model import GraphAE
+from graph_neural_net.build_graph import build_graph
+from graph_neural_net.train import evaluate
 import torch
 
 app = Flask(__name__)
@@ -57,11 +59,23 @@ def process_classifier_neural_net(df):
     return prob, pred
 
 def process_graph_neural_net(df):
-    loaded = loadedGraphNN
+    loaded = loadedGraphNN # select model
 
-    loaded["model"].eval()
+    loaded["model"].eval() # set the model to evaluation mode
 
-    prob, pred = [], []
+    combined_df = pd.concat([loaded["base_df"], df], ignore_index=True) # combine train and new data
+
+    graph = build_graph(combined_df, loaded["feature_cols"]) # build complete graph
+
+    mask = torch.zeros(len(combined_df), dtype=torch.bool) # mask data
+    mask[-len(df):] = True  # unmask only new data to evaluate
+
+    graph["transaction"].mask = mask # apply mask
+
+    _, scores, _ = evaluate(loaded["model"], graph, loaded["weights"]) # evaluate the probability of fraud
+
+    prob = scores.numpy()
+    pred = (prob > loaded["threshold"]).astype(int) # flag fraud (1) if past threshold, else not fraud (0)
 
     return prob, pred
 
@@ -82,6 +96,8 @@ def process():
     df = pd.DataFrame(input_data, columns=columns)
     if "fraud" in df.columns:
         df = df.drop(columns=["fraud"])
+
+    # CONVERT TO SUPERVISED/UNSUPERVISED FORMAT
 
     func = task_map.get(task)
     if not func:
@@ -112,6 +128,10 @@ def home():
         </body>
     </html>
     """
+
+@app.route("/tasks")
+def get_tasks():
+    return jsonify(list(task_map.keys()))
 
 if __name__ == "__main__":
 
