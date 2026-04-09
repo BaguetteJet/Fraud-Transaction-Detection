@@ -7,6 +7,7 @@ import joblib
 from sklearn.tree import DecisionTreeClassifier
 
 from classifier_neural_net.model import Model
+from graph_neural_net.model import GraphAE
 import torch
 
 app = Flask(__name__)
@@ -55,7 +56,8 @@ def process_classifier_neural_net(df):
 
     return prob, pred
 
-# def process_graph_nn(input):
+def process_graph_neural_net(df):
+    return
 
 @app.route("/process", methods=["POST"])
 def process():
@@ -107,19 +109,21 @@ def home():
 
 if __name__ == "__main__":
 
-    # load available models
+    print("loading models...")
     loadedDecisionTree = joblib.load("results/models/decision_tree.pkl")
     loadedLogisticRegression = joblib.load("results/models/logistic_regression.pkl")
     # loadedXGBoost = joblib.load("results/models/xgboost.pkl")
     loadedClassifierNN = torch.load("results/models/classifier_nn.pt", weights_only=False)
-    # loadedGraphNN = torch.load("results/models/graph_nn.pt")
+    loadedGraphNN = torch.load("results/models/graph_nn.pt", weights_only=False)
 
     task_map = {
         "decision_tree": process_decision_tree,
         "logistic_regression": process_logistic_regression,
-        "classifier_neural_net": process_classifier_neural_net
+        "classifier_neural_net": process_classifier_neural_net,
+        "graph_neural_net": process_graph_neural_net
     }
 
+    print("running app...")
     app.run(debug=True)
 
 # run in terminal:
