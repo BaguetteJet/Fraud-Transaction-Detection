@@ -57,7 +57,13 @@ def process_classifier_neural_net(df):
     return prob, pred
 
 def process_graph_neural_net(df):
-    return
+    loaded = loadedGraphNN
+
+    loaded["model"].eval()
+
+    prob, pred = [], []
+
+    return prob, pred
 
 @app.route("/process", methods=["POST"])
 def process():

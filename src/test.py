@@ -20,7 +20,7 @@ dataUnSup = {
 	]
 }
 
-data = dataSup
+data = dataUnSup
 
 print(f"sending...\n {data['model']} | {len(data['input'])} rows")
 
