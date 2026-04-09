@@ -28,13 +28,13 @@ def process_logistic_regression(df):
     
     return prob, pred
 
-# def process_xgboost(input):
-#     loaded = loadedXGBoost
-#
-#     prob = loaded["model"].predict_proba(df)[:,1]
-#     pred = (prob > loaded["threshold"]).astype(int)
-#   
-#     return prob, pred
+def process_xgboost(df):
+    loaded = loadedXGBoost
+
+    prob = loaded["model"].predict_proba(df)[:,1]
+    pred = (prob > loaded["threshold"]).astype(int)
+  
+    return prob, pred
 
 def process_classifier_neural_net(df):
     loaded = loadedClassifierNN # select model
@@ -112,13 +112,14 @@ if __name__ == "__main__":
     print("loading models...")
     loadedDecisionTree = joblib.load("results/models/decision_tree.pkl")
     loadedLogisticRegression = joblib.load("results/models/logistic_regression.pkl")
-    # loadedXGBoost = joblib.load("results/models/xgboost.pkl")
+    loadedXGBoost = joblib.load("results/models/xgboost.pkl")
     loadedClassifierNN = torch.load("results/models/classifier_nn.pt", weights_only=False)
     loadedGraphNN = torch.load("results/models/graph_nn.pt", weights_only=False)
 
     task_map = {
         "decision_tree": process_decision_tree,
         "logistic_regression": process_logistic_regression,
+        "xgboost": process_xgboost,
         "classifier_neural_net": process_classifier_neural_net,
         "graph_neural_net": process_graph_neural_net
     }
