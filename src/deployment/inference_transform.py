@@ -22,7 +22,8 @@ class InferencePreprocessor:
         self.cust_cat_row = None
         self.last_row = None
 
-    def get_last_entry(self, filters={}):
+    def get_last_entry(self, filters=None):
+        filters = filters or {}
         conn = sqlite3.connect(self.db_file)
 
         # Joined clause to filter rows together
@@ -245,7 +246,7 @@ class InferencePreprocessor:
     #     return self.standardize()
     
     def transform(self, df):
-        self.input_row = df
+        self.input_row = df.copy()
 
         self.load_reference_rows()
         self.hot_encode()
@@ -253,5 +254,7 @@ class InferencePreprocessor:
         self.merchant_features()
         self.global_features()
         self.drop_columns()
+
+        self.input_row = self.input_row.apply(pd.to_numeric, errors="coerce")
 
         return self.standardize()

@@ -61,7 +61,9 @@ def process_xgboost(df):
 def process_classifier_neural_net(df):
     loaded = loadedClassifierNN # select model
 
-    loaded["model"].eval() # set the model to evaluation mode
+    class_model = Model(**loaded["configs"])
+    class_model.load_state_dict(loaded["model"])
+    class_model.eval() # set the model to evaluation mode
 
     df = torch.FloatTensor(df.values) # convert Pandas DataFrame into PyTorch FloatTensor
 
@@ -69,7 +71,7 @@ def process_classifier_neural_net(df):
 
     with torch.no_grad():
         for data in df:
-            logit = loaded["model"](data) # forward pass to get logit
+            logit = class_model(data) # forward pass to get logit
             probx = torch.sigmoid(logit).item() # convert logit to probability of fraud
             predx = (probx > loaded["threshold"]).astype(int) # flag fraud (1) if past threshold, else not fraud (0)
             
@@ -81,7 +83,9 @@ def process_classifier_neural_net(df):
 def process_graph_neural_net(df):
     loaded = loadedGraphNN # select model
 
-    loaded["model"].eval() # set the model to evaluation mode
+    graph_model = GraphAE(**loaded["configs"])
+    graph_model.load_state_dict(loaded["model"])
+    graph_model.eval() # set the model to evaluation mode
 
     combined_df = pd.concat([loaded["base_df"], df], ignore_index=True) # combine train and new data
 
@@ -92,7 +96,7 @@ def process_graph_neural_net(df):
 
     graph["transaction"].mask = mask # apply mask
 
-    _, scores, _ = evaluate(loaded["model"], graph, loaded["weights"]) # evaluate the probability of fraud
+    _, scores, _ = evaluate(graph_model, graph, loaded["weights"]) # evaluate the probability of fraud
 
     prob = scores.numpy()
     pred = (prob > loaded["threshold"]).astype(int) # flag fraud (1) if past threshold, else not fraud (0)
@@ -113,24 +117,35 @@ def process():
     if not task or not columns or not input_data:
         return jsonify({"error": "Missing fields"}), 400
 
-    df = pd.DataFrame(input_data, columns=columns)
-    if "fraud" in df.columns:
-        df = df.drop(columns=["fraud"])
+    raw_df = pd.DataFrame(input_data, columns=columns)
+    if "fraud" in raw_df.columns:
+        raw_df = raw_df.drop(columns=["fraud"])
 
     # CONVERT TO SUPERVISED/UNSUPERVISED FORMAT
-
+    task_func = None 
     if task == "process_graph_neural_net":
-        df = unsupervised(transformer, df)
+        task_func = unsupervised
     else:
-        df = supervised(transformer, df)
+        task_func = supervised
+    
+    rows = []
+    for i in range(len(raw_df)):
+        input_row = raw_df.iloc[[i]].reset_index() # index needs to be at 0
 
-    print(df.columns.tolist())
+        print(input_row)
+        proc_row = task_func(transformer, input_row)
+
+        rows.append(proc_row)
+
+    proc_df = pd.concat(rows, ignore_index=True)
+    print(proc_df.info())
+    print(proc_df.columns.tolist())
 
     func = task_map.get(task)
     if not func:
         return jsonify({"error": "Invalid model selected"}), 400
 
-    probability, prediction = func(df)
+    probability, prediction = func(proc_df)
 
     probability = np.atleast_1d(probability)
     prediction = np.atleast_1d(prediction)
