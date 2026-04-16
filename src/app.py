@@ -20,12 +20,18 @@ def supervised(transformer, df):
     frame = transformer.transform(df)
     cols_to_drop = ["customer", "merchant"] + [col for col in frame.columns if col.startswith("category")]
     frame.drop(columns=cols_to_drop,inplace = True)
+
+    if "fraud" in frame.columns:
+        frame = frame.drop(columns=["fraud"]) # why is fraud even here??
+
     return frame
 
 def unsupervised(transformer, df):
     frame = transformer.transform(df)
 
-    frame.drop(columns=["fraud"], inplace=True)
+    if "fraud" in frame.columns:
+        frame = frame.drop(columns=["fraud"])  # why is fraud even here??
+
     return frame
 
 def process_decision_tree(df):
@@ -118,7 +124,7 @@ def process():
     else:
         df = supervised(transformer, df)
 
-    print(df)
+    print(df.columns.tolist())
 
     func = task_map.get(task)
     if not func:

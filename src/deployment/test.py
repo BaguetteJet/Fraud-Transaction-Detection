@@ -7,16 +7,14 @@ PREPROCESSOR_FILE = "data/processed/preprocessor.pkl"
 COLUMNS = ["step","customer","age","gender","zipcodeori","merchant","zipmerchant","category","customer_amount"]
 
 def supervised(transformer, df):
-    frame = df
+    frame = transformer.transform(df)
 
     cols_to_drop = ["customer", "merchant"] + [col for col in frame.columns if col.startswith("category")]
     frame.drop(columns=cols_to_drop,inplace = True)
     return frame
 
 def unsupervised(transformer, df):
-    frame = df
-
-    frame.drop(columns=["fraud"], inplace=True)
+    frame = transformer.transform(df)
     return frame
 
 if __name__ == "__main__":
