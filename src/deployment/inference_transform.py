@@ -232,8 +232,20 @@ class InferencePreprocessor:
         scaled = self.preprocessor.transform(self.input_row)
         return pd.DataFrame(scaled, columns=self.preprocessor.get_feature_names_out())
 
-    def transform(self, sample, columns):
-        self.input_row = pd.DataFrame([sample], columns=columns)
+    # def transform(self, sample, columns):
+    #     self.input_row = pd.DataFrame([sample], columns=columns)
+
+    #     self.load_reference_rows()
+    #     self.hot_encode()
+    #     self.customer_features()
+    #     self.merchant_features()
+    #     self.global_features()
+    #     self.drop_columns()
+
+    #     return self.standardize()
+    
+    def transform(self, df):
+        self.input_row = df
 
         self.load_reference_rows()
         self.hot_encode()

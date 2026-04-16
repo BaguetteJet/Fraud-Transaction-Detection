@@ -12,7 +12,21 @@ from graph_neural_net.build_graph import build_graph
 from graph_neural_net.train import evaluate
 import torch
 
+from deployment.inference_transform import InferencePreprocessor
+
 app = Flask(__name__)
+
+def supervised(transformer, df):
+    frame = transformer.transform(df)
+    cols_to_drop = ["customer", "merchant"] + [col for col in frame.columns if col.startswith("category")]
+    frame.drop(columns=cols_to_drop,inplace = True)
+    return frame
+
+def unsupervised(transformer, df):
+    frame = transformer.transform(df)
+
+    frame.drop(columns=["fraud"], inplace=True)
+    return frame
 
 def process_decision_tree(df):
     loaded = loadedDecisionTree # select model
@@ -99,6 +113,13 @@ def process():
 
     # CONVERT TO SUPERVISED/UNSUPERVISED FORMAT
 
+    if task == "process_graph_neural_net":
+        df = unsupervised(transformer, df)
+    else:
+        df = supervised(transformer, df)
+
+    print(df)
+
     func = task_map.get(task)
     if not func:
         return jsonify({"error": "Invalid model selected"}), 400
@@ -141,6 +162,12 @@ if __name__ == "__main__":
     loadedXGBoost = joblib.load("results/models/xgboost.pkl")
     loadedClassifierNN = torch.load("results/models/classifier_nn.pt", weights_only=False)
     loadedGraphNN = torch.load("results/models/graph_nn.pt", weights_only=False)
+
+    print("loading transformer...")
+    DB_FILE = "data/database.db"
+    TABLE_NAME = "records"
+    PREPROCESSOR_FILE = "data/processed/preprocessor.pkl"
+    transformer = InferencePreprocessor(DB_FILE, TABLE_NAME, PREPROCESSOR_FILE)
 
     task_map = {
         "decision_tree": process_decision_tree,
