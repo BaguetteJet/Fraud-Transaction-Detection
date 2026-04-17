@@ -4,7 +4,6 @@ import numpy as np
 import time
 
 import joblib
-from sklearn.tree import DecisionTreeClassifier
 
 from classifier_neural_net.model import Model
 from graph_neural_net.model import GraphAE
@@ -35,6 +34,8 @@ def unsupervised(transformer, df):
     return frame
 
 def process_decision_tree(df):
+    print("DECISION TREE SEES THIS")
+    print(df)
     loaded = loadedDecisionTree # select model
 
     prob = loaded["model"].predict_proba(df)[:,1] # evaluate probability of fraud
@@ -123,7 +124,7 @@ def process():
 
     # CONVERT TO SUPERVISED/UNSUPERVISED FORMAT
     task_func = None 
-    if task == "process_graph_neural_net":
+    if task in "process_graph_neural_net":
         task_func = unsupervised
     else:
         task_func = supervised
@@ -139,7 +140,6 @@ def process():
 
     proc_df = pd.concat(rows, ignore_index=True)
     print(proc_df.info())
-    print(proc_df.columns.tolist())
 
     func = task_map.get(task)
     if not func:
