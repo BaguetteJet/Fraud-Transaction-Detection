@@ -4,10 +4,11 @@ url = "http://127.0.0.1:5000/process"
 
 data = {
   "model": "xgboost",
-  "columns": ["step","customer","age","gender","zipcodeori","merchant","zipmerchant","category","amount","fraud"],
+  "columns": ["step","customer","age","gender","zipcodeori","merchant","zipmerchant","category","amount"],
   "input": [
-	  	[65,'C226946948',"'3'","'M'",'28007','M348934600','28007','es_transportation',27.51,0],
-	    [156,'C1732568163',"'4'","'F'",'28007','M3697346','28007','es_leisure',257.93,1]
+	  	[180,'C226946948',"'3'","'M'",'28007','M348934600','28007','es_transportation',27.51], # legit
+	    [181,'C1732568163',"'4'","'F'",'28007','M3697346','28007','es_leisure',257.93], # fraud
+		[182,'C57136184','6','F','28007','M348934600','28007','es_transportation',15.99] # legit
     ]
 }
 
