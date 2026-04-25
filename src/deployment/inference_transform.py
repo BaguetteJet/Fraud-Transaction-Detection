@@ -254,7 +254,9 @@ class InferencePreprocessor:
         self.merchant_features()
         self.global_features()
         self.drop_columns()
+        output_row = self.standardize()
 
-        self.input_row = self.input_row.apply(pd.to_numeric, errors="coerce")
+        numeric_cols = output_row.columns.difference(["customer", "merchant"])
+        output_row[numeric_cols] = output_row[numeric_cols].apply(pd.to_numeric, errors="coerce")
 
-        return self.standardize()
+        return output_row
