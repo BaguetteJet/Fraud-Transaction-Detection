@@ -1,4 +1,5 @@
 # Weights for training from importance and premutation of other models
+# Used to give more importance to certain features during training of the GNN
 def get_weight(col):
     if col in [
         "customer_log_amount_ratio",
